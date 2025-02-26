@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auxiliar de vendas</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            border: 1px solid white;
+            border-radius: 10px;
+            width: 400px;
+        }
+        input, select {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            position: fixed;
+            bottom: 20px;
+            background-color: #32CD32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        #copyButton {
+            right: 20px;
+        }
+        #clearButton {
+            left: 20px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        .feedback {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background-color: #32CD32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h2>販 売</h2>
+    <div class="container">
+        <!-- Campo de entrada para o CNPJ -->
+        <label for="cnpj">CNPJ:</label>
+        <input type="text" id="cnpj" maxlength="18" placeholder="Digite o CNPJ" required oninput="formatarCNPJInput(this)">
+        
+        <!-- Campo de entrada para o Nome -->
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" maxlength="30" placeholder="Digite o Nome" required>
+        
+        <!-- Campo de entrada para o Telefone -->
+        <label for="telefone">Telefone:</label>
+        <input type="text" id="telefone" maxlength="15" placeholder="Digite o Telefone" required oninput="formatarTelefoneInput(this)">
+        
+        <!-- Campo para realizar escolha de módulo -->
+        <label for="modulo">Módulo:</label>
+        <select id="modulo" required>
+            <option value="0">Selecione</option>
+            <option value="Android">Android</option>
+            <option value="Averbador de seguros">Averbador de seguros</option>
+            <option value="Backup em nuvem">Backup em nuvem</option>
+            <option value="Certificado digital (A1)">Certificado digital (A1)</option>
+            <option value="Ciot">Ciot</option>
+            <option value="Comercial">Comercial</option>
+            <option value="CT-e">CT-e</option>
+            <option value="Estoque">Estoque</option>
+            <option value="Farmacia">Farmacia</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="Loja virtual">Loja virtual</option>
+            <option value="Marketplace">Marketplace</option>
+            <option value="MDF-e">MDF-e</option>
+            <option value="NF-e importação">NF-e importação</option>
+            <option value="NF-e">NF-e</option>
+            <option value="NFC-e">NFC-e</option>
+            <option value="NFS-e">NFS-e</option>
+            <option value="Novo atalho">Novo atalho</option>
+            <option value="Restaurante">Restaurante</option>
+            <option value="Sintegra">Sintegra</option>
+            <option value="Sped">Sped</option>
+        </select>
+        
+        <!-- Campo de entrada para o valor do módulo -->
+        <label for="valor">Valor do Módulo:</label>
+        <input type="text" id="valor" placeholder="R$ 0,00" required oninput="formatarValorInput(this)">
+        
+        <!-- Campo de entrada para a data -->
+        <label for="data">Data:</label>
+        <input type="date" id="data" required>
+    </div>
+    <!-- Botão para copiar os dados preenchidos -->
+    <button id="copyButton" onclick="copiarTexto()">Copy</button>
+
+    <!-- Botão para limpar os campos -->
+    <button id="clearButton" onclick="limparCampos()">Clean</button>
+
+    <!-- Mensagem de feedback ao copiar os dados -->
+    <div class="feedback" id="feedback">Texto copiado!</div>
+
+    <!-- Mensagem de feedback ao limpar os campos -->
+    <div class="feedback" id="clearFeedback">Campos limpos!</div>
+    
+    <script>
+        // Função para formatar um CNPJ com pontos, barras e traços
+        function formatarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+            return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+        }
+
+        // Função para formatar automaticamente a entrada do CNPJ
+        function formatarCNPJInput(input) {
+            let cnpj = input.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (cnpj.length > 14) cnpj = cnpj.slice(0, 14); // Limita o CNPJ a 14 dígitos
+            input.value = formatarCNPJ(cnpj); // Atualiza o valor do input formatado
+        }
+
+        // Função para formatar um número de telefone (Fixo ou Celular)
+        function formatarTelefone(telefone) {
+            telefone = telefone.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (telefone.length === 11) {
+                return telefone.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3"); // Formata como celular
+            } else if (telefone.length === 10) {
+                return telefone.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3"); // Formata como telefone fixo
+            }
+            return telefone;
+        }
+
+        // Função para formatar automaticamente a entrada do telefone
+        function formatarTelefoneInput(input) {
+            let telefone = input.value.replace(/\D/g, '');// Remove caracteres não numéricos
+            if (telefone.length > 11) telefone = telefone.slice(0, 11); // Limita o telefone a 11 dígitos
+            input.value = formatarTelefone(telefone); // Atualiza o valor do input formatado
+        }
+
+        // Função para formatar um valor monetário no formato brasileiro (R$ 0,00)
+        function formatarValor(valor) {
+            valor = valor.replace(/\D/g, ''); // Remove caracteres não numéricos
+            valor = valor.replace(/^0+/, ''); // Remove zeros à esquerda
+            if (valor.length === 0) return "R$ 0,00"; // Retorna um valor padrão se estiver vazio
+            if (valor.length === 1) return `R$ 0,0${valor}`; // Retorna um valor padrão se estiver vazio
+            if (valor.length === 2) return `R$ 0,${valor}`; // Para valores de dois dígitos
+            let parteInteira = valor.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formata milhares com ponto
+            let parteDecimal = valor.slice(-2); // Obtém os últimos dois dígitos como centavos
+            return `R$ ${parteInteira},${parteDecimal}`;// Retorna o valor formatado
+        }
+
+        // Função para formatar automaticamente a entrada de valor monetário
+        function formatarValorInput(input) {
+            input.value = formatarValor(input.value);// Atualiza o valor do input formatado
+        }
+
+        // Função para copiar os dados preenchidos no formulário para a área de transferência
+        function copiarTexto() {
+            let cnpj = document.getElementById('cnpj').value;
+            let nome = document.getElementById('nome').value;
+            let telefone = document.getElementById('telefone').value;
+            let modulo = document.getElementById('modulo').value;
+            let valor = document.getElementById('valor').value;
+            let data = document.getElementById('data').value;
+            
+            //Modelo de formatação para o texto copiado
+            const texto = "```\nCNPJ: " + cnpj + "\n\nNome: " + nome + "\n\nTelefone: " + telefone + "\n\nMódulo: " + modulo + "\n\nValor: " + valor + "\n\nData: " + data + "\n```";
+            
+            // Copia o texto para a área de transferência
+            navigator.clipboard.writeText(texto).then(() => {
+                const feedback = document.getElementById('feedback'); // Obtém o elemento de feedback
+                feedback.style.display = 'block'; // Exibe a mensagem "Texto copiado!"
+                setTimeout(() => {
+                    feedback.style.display = 'none'; // Oculta a mensagem após 2 segundos
+                }, 2000);
+            });
+        }
+
+        // Função para limpar os campos do formulário
+        function limparCampos() {
+            document.getElementById('cnpj').value = '';
+            document.getElementById('nome').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('modulo').value = '0';
+            document.getElementById('valor').value = '';
+            document.getElementById('data').value = '';
+
+            const clearFeedback = document.getElementById('clearFeedback'); // Obtém o elemento de feedback
+            clearFeedback.style.display = 'block'; // Exibe a mensagem "Campos limpos!"
+            setTimeout(() => {
+                clearFeedback.style.display = 'none'; // Oculta a mensagem após 2 segundos
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
