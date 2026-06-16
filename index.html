@@ -1,220 +1,322 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auxiliar de vendas</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 20px;
-            border: 1px solid white;
-            border-radius: 10px;
-            width: 400px;
-        }
-        input, select {
-            background-color: #444;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            position: fixed;
-            bottom: 20px;
-            background-color: #32CD32;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-        #copyButton {
-            right: 20px;
-        }
-        #clearButton {
-            left: 20px;
-        }
-        h2 {
-            margin-bottom: 20px;
-        }
-        .feedback {
-            display: none;
-            position: fixed;
-            bottom: 70px;
-            right: 20px;
-            background-color: #32CD32;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assistente de Vendas & Comissões</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
-    <h2>販 売</h2>
-    <div class="container">
-        <!-- Campo de entrada para o CNPJ -->
-        <label for="cnpj">CNPJ:</label>
-        <input type="text" id="cnpj" maxlength="18" placeholder="Digite o CNPJ" required oninput="formatarCNPJInput(this)">
-        
-        <!-- Campo de entrada para o Nome -->
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" maxlength="30" placeholder="Digite o Nome" required>
-        
-        <!-- Campo de entrada para o Telefone -->
-        <label for="telefone">Telefone:</label>
-        <input type="text" id="telefone" maxlength="15" placeholder="Digite o Telefone" required oninput="formatarTelefoneInput(this)">
-        
-        <!-- Campo para realizar escolha de módulo -->
-        <label for="modulo">Módulo:</label>
-        <select id="modulo" required>
-            <option value="0">Selecione</option>
-            <option value="Android">Android</option>
-            <option value="Averbador de seguros">Averbador de seguros</option>
-            <option value="Backup em nuvem">Backup em nuvem</option>
-            <option value="Certificado digital (A1)">Certificado digital (A1)</option>
-            <option value="Ciot">Ciot</option>
-            <option value="Comercial">Comercial</option>
-            <option value="CT-e">CT-e</option>
-            <option value="Estoque">Estoque</option>
-            <option value="Farmacia">Farmacia</option>
-            <option value="Financeiro">Financeiro</option>
-            <option value="Loja virtual">Loja virtual</option>
-            <option value="Marketplace">Marketplace</option>
-            <option value="MDF-e">MDF-e</option>
-            <option value="NF-e importação">NF-e importação</option>
-            <option value="NF-e">NF-e</option>
-            <option value="NFC-e">NFC-e</option>
-            <option value="NFS-e">NFS-e</option>
-            <option value="Novo atalho">Novo atalho</option>
-            <option value="Restaurante">Restaurante</option>
-            <option value="Sintegra">Sintegra</option>
-            <option value="Sped">Sped</option>
-        </select>
-        
-        <!-- Campo de entrada para o valor do módulo -->
-        <label for="valor">Valor do Módulo:</label>
-        <input type="text" id="valor" placeholder="R$ 0,00" required oninput="formatarValorInput(this)">
-        
-        <!-- Campo de entrada para a data -->
-        <label for="data">Data:</label>
-        <input type="date" id="data" required>
+
+<!-- ═══════ CABEÇALHO ═══════ -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <h1>📊 Assistente de Vendas</h1>
+      <p id="header-date" class="header-date"></p>
     </div>
-    <!-- Botão para copiar os dados preenchidos -->
-    <button id="copyButton" onclick="copiarTexto()">Copy</button>
+    <div class="header-actions">
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="🔍 Buscar venda..." oninput="Search.run(this.value)" autocomplete="off"/>
+        <button class="btn-clear-search hidden" id="btn-clear-search" onclick="Search.clear()">✕</button>
+      </div>
+      <label class="toggle-voice" title="Ativar/desativar narração">
+        <input type="checkbox" id="voice-enabled" checked>
+        <span>🔊</span>
+      </label>
+      <button class="btn btn-icon" id="btn-theme" title="Alternar tema" onclick="App.toggleTheme()">🌙</button>
+      <button class="btn btn-icon" id="btn-backup" title="Backup dos dados" onclick="Backup.export()">💾</button>
+    </div>
+  </div>
+</header>
 
-    <!-- Botão para limpar os campos -->
-    <button id="clearButton" onclick="limparCampos()">Clean</button>
+<main class="container">
 
-    <!-- Mensagem de feedback ao copiar os dados -->
-    <div class="feedback" id="feedback">Texto copiado!</div>
+  <!-- ═══ BANNER DE CONQUISTA (oculto por padrão) ═══ -->
+  <div class="achievement-banner hidden" id="achievement-banner">
+    <span id="achievement-text">🏆 Meta atingida!</span>
+    <button onclick="this.parentElement.classList.add('hidden')">✕</button>
+  </div>
 
-    <!-- Mensagem de feedback ao limpar os campos -->
-    <div class="feedback" id="clearFeedback">Campos limpos!</div>
-    
-    <script>
-        // Função para formatar um CNPJ com pontos, barras e traços
-        function formatarCNPJ(cnpj) {
-            cnpj = cnpj.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-            return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-        }
+  <!-- ═══ RESUMO DO DIA ═══ -->
+  <section class="card daily-banner">
+    <h2 class="card-title">☀️ Resumo do dia</h2>
+    <div class="daily-grid">
+      <div class="daily-item"><span class="daily-label">Vendas hoje</span><strong id="d-count">0</strong></div>
+      <div class="daily-item"><span class="daily-label">Receita hoje</span><strong id="d-revenue">R$0,00</strong></div>
+      <div class="daily-item"><span class="daily-label">Comissão hoje</span><strong id="d-comm">R$0,00</strong></div>
+      <div class="daily-item"><span class="daily-label">Ticket médio</span><strong id="d-ticket">R$0,00</strong></div>
+      <div class="daily-item"><span class="daily-label">Melhor venda</span><strong id="d-best">—</strong></div>
+    </div>
+  </section>
 
-        // Função para formatar automaticamente a entrada do CNPJ
-        function formatarCNPJInput(input) {
-            let cnpj = input.value.replace(/\D/g, ''); // Remove caracteres não numéricos
-            if (cnpj.length > 14) cnpj = cnpj.slice(0, 14); // Limita o CNPJ a 14 dígitos
-            input.value = formatarCNPJ(cnpj); // Atualiza o valor do input formatado
-        }
+  <!-- ═══ METAS ═══ -->
+  <section class="metas-grid">
+    <div class="meta-card">
+      <div class="meta-header">
+        <span class="meta-label">💰 Meta de vendas (mês)</span>
+        <div class="meta-header-right">
+          <span class="meta-pct" id="pct-sales">0%</span>
+          <button class="btn-edit-meta" onclick="MetaEditor.open('sales')" title="Editar meta">✎</button>
+        </div>
+      </div>
+      <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar bar-sales" id="bar-sales" style="width:0%"></div>
+      </div>
+      <p class="meta-sub" id="sub-sales">R$0,00 de R$2.000,00 • faltam R$2.000,00</p>
+    </div>
+    <div class="meta-card">
+      <div class="meta-header">
+        <span class="meta-label">🏆 Meta de comissão (mês)</span>
+        <div class="meta-header-right">
+          <span class="meta-pct" id="pct-comm">0%</span>
+          <button class="btn-edit-meta" onclick="MetaEditor.open('comm')" title="Editar meta">✎</button>
+        </div>
+      </div>
+      <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar bar-comm" id="bar-comm" style="width:0%"></div>
+      </div>
+      <p class="meta-sub" id="sub-comm">R$0,00 de R$2.000,00 • faltam R$2.000,00</p>
+    </div>
+  </section>
 
-        // Função para formatar um número de telefone (Fixo ou Celular)
-        function formatarTelefone(telefone) {
-            telefone = telefone.replace(/\D/g, ''); // Remove caracteres não numéricos
-            if (telefone.length === 11) {
-                return telefone.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3"); // Formata como celular
-            } else if (telefone.length === 10) {
-                return telefone.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3"); // Formata como telefone fixo
-            }
-            return telefone;
-        }
+  <!-- ═══ MÉTRICAS ═══ -->
+  <section class="metrics-grid">
+    <div class="metric-card">
+      <span class="metric-label">Total de vendas</span>
+      <span class="metric-value" id="m-count">0</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Receita total</span>
+      <span class="metric-value" id="m-revenue">R$0,00</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Comissão total</span>
+      <span class="metric-value" id="m-commission">R$0,00</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-label">Ticket médio geral</span>
+      <span class="metric-value" id="m-ticket">R$0,00</span>
+    </div>
+  </section>
 
-        // Função para formatar automaticamente a entrada do telefone
-        function formatarTelefoneInput(input) {
-            let telefone = input.value.replace(/\D/g, '');// Remove caracteres não numéricos
-            if (telefone.length > 11) telefone = telefone.slice(0, 11); // Limita o telefone a 11 dígitos
-            input.value = formatarTelefone(telefone); // Atualiza o valor do input formatado
-        }
+  <!-- ═══ FILTROS DE PERÍODO ═══ -->
+  <div class="period-row" role="group">
+    <button class="period-btn active" onclick="App.setPeriod('all',this)">Todas</button>
+    <button class="period-btn" onclick="App.setPeriod('today',this)">Hoje</button>
+    <button class="period-btn" onclick="App.setPeriod('week',this)">Esta semana</button>
+    <button class="period-btn" onclick="App.setPeriod('month',this)">Este mês</button>
+  </div>
 
-        // Função para formatar um valor monetário no formato brasileiro (R$ 0,00)
-        function formatarValor(valor) {
-            valor = valor.replace(/\D/g, ''); // Remove caracteres não numéricos
-            valor = valor.replace(/^0+/, ''); // Remove zeros à esquerda
-            if (valor.length === 0) return "R$ 0,00"; // Retorna um valor padrão se estiver vazio
-            if (valor.length === 1) return `R$ 0,0${valor}`; // Retorna um valor padrão se estiver vazio
-            if (valor.length === 2) return `R$ 0,${valor}`; // Para valores de dois dígitos
-            let parteInteira = valor.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Formata milhares com ponto
-            let parteDecimal = valor.slice(-2); // Obtém os últimos dois dígitos como centavos
-            return `R$ ${parteInteira},${parteDecimal}`;// Retorna o valor formatado
-        }
+  <!-- ═══ VOZ ═══ -->
+  <div class="voice-bar">
+    <button class="btn-mic" id="btn-mic" onclick="Voice.toggle()" title="Clique e fale a venda">🎙️</button>
+    <div class="voice-info">
+      <p id="voice-status"><span class="voice-label">Microfone</span> — diga ex: <em>"Estoque quarenta reais"</em></p>
+      <p class="voice-transcript" id="voice-transcript"></p>
+    </div>
+  </div>
 
-        // Função para formatar automaticamente a entrada de valor monetário
-        function formatarValorInput(input) {
-            input.value = formatarValor(input.value);// Atualiza o valor do input formatado
-        }
+  <!-- ═══ FORMULÁRIO ═══ -->
+  <section class="card form-card">
+    <div class="form-row">
+      <div class="field">
+        <label for="inp-product">Produto</label>
+        <select id="inp-product" onchange="Form.onProductChange()">
+          <option value="">Selecione o produto...</option>
+          <optgroup label="── Anotação ──" id="grp-anotacao"></optgroup>
+          <optgroup label="── Mercadoria ──" id="grp-mercadoria"></optgroup>
+          <option value="outro">Outro (digitar)...</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="inp-qty">Qtd.</label>
+        <input type="number" id="inp-qty" value="1" min="1" max="99" step="1"/>
+      </div>
+      <div class="field">
+        <label for="inp-value">Valor unit. (R$)</label>
+        <input type="number" id="inp-value" placeholder="0,00" min="0" step="0.01"/>
+      </div>
+      <div class="field field-btn">
+        <label class="label-hidden">Ação</label>
+        <button class="btn btn-primary" onclick="Form.addSale()">＋ Registrar</button>
+      </div>
+    </div>
+    <!-- Preview comissão em tempo real -->
+    <div class="commission-preview" id="commission-preview"></div>
+    <div id="custom-row" class="custom-row hidden">
+      <div class="field">
+        <label for="inp-custom">Nome do produto</label>
+        <input type="text" id="inp-custom" placeholder="Digite o nome do produto..."/>
+      </div>
+    </div>
+  </section>
 
-        // Função para copiar os dados preenchidos no formulário para a área de transferência
-        function copiarTexto() {
-            let cnpj = document.getElementById('cnpj').value;
-            let nome = document.getElementById('nome').value;
-            let telefone = document.getElementById('telefone').value;
-            let modulo = document.getElementById('modulo').value;
-            let valor = document.getElementById('valor').value;
-            let data = document.getElementById('data').value;
-            
-            //Modelo de formatação para o texto copiado
-            const texto = "```\nCNPJ: " + cnpj + "\n\nNome: " + nome + "\n\nTelefone: " + telefone + "\n\nMódulo: " + modulo + "\n\nValor: " + valor + "\n\nData: " + data + "\n```";
-            
-            // Copia o texto para a área de transferência
-            navigator.clipboard.writeText(texto).then(() => {
-                const feedback = document.getElementById('feedback'); // Obtém o elemento de feedback
-                feedback.style.display = 'block'; // Exibe a mensagem "Texto copiado!"
-                setTimeout(() => {
-                    feedback.style.display = 'none'; // Oculta a mensagem após 2 segundos
-                }, 2000);
-            });
-        }
+  <!-- ═══ HISTÓRICO ═══ -->
+  <section>
+    <div class="list-header">
+      <h2 class="section-title">Histórico de vendas</h2>
+      <div class="list-header-right">
+        <span class="list-count" id="list-count"></span>
+        <select class="sort-select" id="sort-select" onchange="App.setSort(this.value)">
+          <option value="date-desc">Mais recentes</option>
+          <option value="date-asc">Mais antigas</option>
+          <option value="value-desc">Maior valor</option>
+          <option value="value-asc">Menor valor</option>
+          <option value="product-asc">Produto A→Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="sales-list" id="sales-list">
+      <div class="empty-state">Nenhuma venda registrada ainda.<br/>Use o formulário acima ou o microfone para começar.</div>
+    </div>
+    <!-- Paginação -->
+    <div class="pagination" id="pagination"></div>
+  </section>
 
-        // Função para limpar os campos do formulário
-        function limparCampos() {
-            document.getElementById('cnpj').value = '';
-            document.getElementById('nome').value = '';
-            document.getElementById('telefone').value = '';
-            document.getElementById('modulo').value = '0';
-            document.getElementById('valor').value = '';
-            document.getElementById('data').value = '';
+  <!-- ═══ AÇÕES ═══ -->
+  <div class="actions-row">
+    <button class="btn btn-action" onclick="Report.generateText()">📄 Relatório</button>
+    <button class="btn btn-action" onclick="Report.exportPDF()">⬇️ PDF</button>
+    <button class="btn btn-action" onclick="Report.exportExcel()">📊 Excel</button>
+    <button class="btn btn-action" onclick="Importer.openModal()">📥 Importar</button>
+    <button class="btn btn-action" onclick="Backup.import()">📂 Restaurar</button>
+    <button class="btn btn-danger" onclick="App.resetSales()">🗑</button>
+  </div>
 
-            const clearFeedback = document.getElementById('clearFeedback'); // Obtém o elemento de feedback
-            clearFeedback.style.display = 'block'; // Exibe a mensagem "Campos limpos!"
-            setTimeout(() => {
-                clearFeedback.style.display = 'none'; // Oculta a mensagem após 2 segundos
-            }, 2000);
-        }
-    </script>
+  <!-- ═══ GRÁFICO TOP 5 (ao final) ═══ -->
+  <section class="card chart-section">
+    <h2 class="card-title">🥧 Top 5 — Produtos mais vendidos</h2>
+    <div class="chart-container">
+      <div class="chart-canvas-wrap">
+        <canvas id="top5Chart"></canvas>
+      </div>
+      <div id="top5Legend" class="chart-legend">
+        <p class="chart-empty">Nenhuma venda registrada ainda.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══ MODAL RELATÓRIO ═══ -->
+<div class="modal-overlay hidden" id="modal-report" onclick="Report.closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📊 Relatório de Vendas</h2>
+      <button class="btn-close" onclick="Report.closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <pre id="modal-content" class="report-text"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-action" onclick="Report.copyToClipboard()">📋 Copiar</button>
+      <button class="btn btn-primary" onclick="Report.closeModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDIÇÃO ═══ -->
+<div class="modal-overlay hidden" id="modal-edit" onclick="Editor.closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ Editar Venda</h2>
+      <button class="btn-close btn-close-white" onclick="Editor.closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="edit-form">
+        <div class="field">
+          <label for="edit-product">Módulo / Produto</label>
+          <select id="edit-product" onchange="Editor.onProductChange()">
+            <option value="">Selecione...</option>
+            <optgroup label="── Anotação ──" id="edit-grp-anotacao"></optgroup>
+            <optgroup label="── Mercadoria ──" id="edit-grp-mercadoria"></optgroup>
+            <option value="outro">Outro (digitar)...</option>
+          </select>
+        </div>
+        <div id="edit-custom-row" class="custom-row hidden">
+          <div class="field">
+            <label for="edit-custom">Nome do produto</label>
+            <input type="text" id="edit-custom" placeholder="Nome do produto..."/>
+          </div>
+        </div>
+        <div class="field">
+          <label for="edit-date">Data da venda</label>
+          <input type="date" id="edit-date"/>
+        </div>
+        <div class="field">
+          <label for="edit-value">Valor (R$)</label>
+          <input type="number" id="edit-value" placeholder="0,00" min="0" step="0.01" oninput="Editor.updatePreview()"/>
+        </div>
+        <div class="edit-commission-preview" id="edit-comm-preview"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-save-green" onclick="Editor.save()">💾 Salvar alterações</button>
+      <button class="btn" onclick="Editor.closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL IMPORTAÇÃO ═══ -->
+<div class="modal-overlay hidden" id="modal-import" onclick="Importer.closeModal(event)">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>📥 Importar Relatório</h2>
+      <button class="btn-close" onclick="Importer.closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="import-instructions">Cole um relatório gerado pelo sistema. As vendas serão identificadas automaticamente.</p>
+      <textarea id="import-textarea" class="import-textarea" rows="10" spellcheck="false"
+        placeholder="Cole aqui o relatório...&#10;&#10;Exemplo:&#10;ESTOQUE — 2 vendas&#10;  1. 03/06/2026  |  Valor: R$40,00  |  Comissão: R$40,00 (100%)"></textarea>
+      <div class="import-preview hidden" id="import-preview">
+        <div class="import-preview-title">✅ Vendas identificadas:</div>
+        <div id="import-preview-list" class="import-preview-list"></div>
+      </div>
+      <div class="import-error hidden" id="import-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-action" onclick="Importer.preview()">🔍 Pré-visualizar</button>
+      <button class="btn btn-primary hidden" id="btn-confirm-import" onclick="Importer.confirm()">✅ Confirmar</button>
+      <button class="btn" onclick="Importer.closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDITAR META ═══ -->
+<div class="modal-overlay hidden" id="modal-meta" onclick="MetaEditor.closeModal(event)">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 id="meta-modal-title">✎ Editar Meta</h2>
+      <button class="btn-close" onclick="MetaEditor.closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="meta-value-input" id="meta-modal-label">Valor da meta (R$)</label>
+        <input type="number" id="meta-value-input" min="100" step="100" placeholder="2000"/>
+      </div>
+      <p class="meta-hint">A meta é mensal e será exibida na barra de progresso.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-save-green" onclick="MetaEditor.save()">💾 Salvar</button>
+      <button class="btn" onclick="MetaEditor.closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast hidden" id="toast" role="alert" aria-live="polite">
+  <span class="toast-icon" id="toast-icon">✓</span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- input oculto para restaurar backup -->
+<input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="Backup.importFile(this)"/>
+
+<script src="script.js"></script>
 </body>
 </html>
