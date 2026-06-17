@@ -22,7 +22,7 @@
 
 const VALID_USERNAME = 'poatan';
 const VALID_PASSWORD = '007';
-const REDIRECT_URL   = 'gerenciador/index.html';
+const REDIRECT_URL   = 'gerenciador/gerenciador.html';
 
 const SESSION_KEY      = 'av-logged-in';
 const SESSION_TIME_KEY = 'av-login-time';
