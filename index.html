@@ -1,322 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Assistente de Vendas & Comissões</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a12" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%237c7cf8'/%3E%3Ctext x='50' y='66' font-size='55' text-anchor='middle' fill='white' font-family='Arial'%3E%24%3C/text%3E%3C/svg%3E" />
+  <title>Login — Assistente de Vendas</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- ═══════ CABEÇALHO ═══════ -->
-<header class="app-header">
-  <div class="header-inner">
-    <div class="header-brand">
-      <h1>📊 Assistente de Vendas</h1>
-      <p id="header-date" class="header-date"></p>
-    </div>
-    <div class="header-actions">
-      <div class="search-wrap">
-        <input type="text" id="search-input" placeholder="🔍 Buscar venda..." oninput="Search.run(this.value)" autocomplete="off"/>
-        <button class="btn-clear-search hidden" id="btn-clear-search" onclick="Search.clear()">✕</button>
+  <!-- Imagem de fundo (papel de parede) -->
+  <div class="bg-image"></div>
+  <!-- Camada escura por cima da imagem para dar contraste ao texto -->
+  <div class="bg-overlay"></div>
+
+  <main class="login-card">
+
+    <!-- ═══ LADO ESQUERDO — boas-vindas ═══ -->
+    <section class="login-left">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Assistente de Vendas</span>
       </div>
-      <label class="toggle-voice" title="Ativar/desativar narração">
-        <input type="checkbox" id="voice-enabled" checked>
-        <span>🔊</span>
-      </label>
-      <button class="btn btn-icon" id="btn-theme" title="Alternar tema" onclick="App.toggleTheme()">🌙</button>
-      <button class="btn btn-icon" id="btn-backup" title="Backup dos dados" onclick="Backup.export()">💾</button>
-    </div>
-  </div>
-</header>
 
-<main class="container">
-
-  <!-- ═══ BANNER DE CONQUISTA (oculto por padrão) ═══ -->
-  <div class="achievement-banner hidden" id="achievement-banner">
-    <span id="achievement-text">🏆 Meta atingida!</span>
-    <button onclick="this.parentElement.classList.add('hidden')">✕</button>
-  </div>
-
-  <!-- ═══ RESUMO DO DIA ═══ -->
-  <section class="card daily-banner">
-    <h2 class="card-title">☀️ Resumo do dia</h2>
-    <div class="daily-grid">
-      <div class="daily-item"><span class="daily-label">Vendas hoje</span><strong id="d-count">0</strong></div>
-      <div class="daily-item"><span class="daily-label">Receita hoje</span><strong id="d-revenue">R$0,00</strong></div>
-      <div class="daily-item"><span class="daily-label">Comissão hoje</span><strong id="d-comm">R$0,00</strong></div>
-      <div class="daily-item"><span class="daily-label">Ticket médio</span><strong id="d-ticket">R$0,00</strong></div>
-      <div class="daily-item"><span class="daily-label">Melhor venda</span><strong id="d-best">—</strong></div>
-    </div>
-  </section>
-
-  <!-- ═══ METAS ═══ -->
-  <section class="metas-grid">
-    <div class="meta-card">
-      <div class="meta-header">
-        <span class="meta-label">💰 Meta de vendas (mês)</span>
-        <div class="meta-header-right">
-          <span class="meta-pct" id="pct-sales">0%</span>
-          <button class="btn-edit-meta" onclick="MetaEditor.open('sales')" title="Editar meta">✎</button>
-        </div>
+      <div class="welcome">
+        <h1>Bem-vindo ao<br/>Assistente de Vendas</h1>
+        <p>
+          Gerencie suas vendas, comissões e metas em um só lugar.
+          Acesse com sua conta para continuar.
+        </p>
       </div>
-      <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar bar-sales" id="bar-sales" style="width:0%"></div>
-      </div>
-      <p class="meta-sub" id="sub-sales">R$0,00 de R$2.000,00 • faltam R$2.000,00</p>
-    </div>
-    <div class="meta-card">
-      <div class="meta-header">
-        <span class="meta-label">🏆 Meta de comissão (mês)</span>
-        <div class="meta-header-right">
-          <span class="meta-pct" id="pct-comm">0%</span>
-          <button class="btn-edit-meta" onclick="MetaEditor.open('comm')" title="Editar meta">✎</button>
-        </div>
-      </div>
-      <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar bar-comm" id="bar-comm" style="width:0%"></div>
-      </div>
-      <p class="meta-sub" id="sub-comm">R$0,00 de R$2.000,00 • faltam R$2.000,00</p>
-    </div>
-  </section>
 
-  <!-- ═══ MÉTRICAS ═══ -->
-  <section class="metrics-grid">
-    <div class="metric-card">
-      <span class="metric-label">Total de vendas</span>
-      <span class="metric-value" id="m-count">0</span>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">Receita total</span>
-      <span class="metric-value" id="m-revenue">R$0,00</span>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">Comissão total</span>
-      <span class="metric-value" id="m-commission">R$0,00</span>
-    </div>
-    <div class="metric-card">
-      <span class="metric-label">Ticket médio geral</span>
-      <span class="metric-value" id="m-ticket">R$0,00</span>
-    </div>
-  </section>
-
-  <!-- ═══ FILTROS DE PERÍODO ═══ -->
-  <div class="period-row" role="group">
-    <button class="period-btn active" onclick="App.setPeriod('all',this)">Todas</button>
-    <button class="period-btn" onclick="App.setPeriod('today',this)">Hoje</button>
-    <button class="period-btn" onclick="App.setPeriod('week',this)">Esta semana</button>
-    <button class="period-btn" onclick="App.setPeriod('month',this)">Este mês</button>
-  </div>
-
-  <!-- ═══ VOZ ═══ -->
-  <div class="voice-bar">
-    <button class="btn-mic" id="btn-mic" onclick="Voice.toggle()" title="Clique e fale a venda">🎙️</button>
-    <div class="voice-info">
-      <p id="voice-status"><span class="voice-label">Microfone</span> — diga ex: <em>"Estoque quarenta reais"</em></p>
-      <p class="voice-transcript" id="voice-transcript"></p>
-    </div>
-  </div>
-
-  <!-- ═══ FORMULÁRIO ═══ -->
-  <section class="card form-card">
-    <div class="form-row">
-      <div class="field">
-        <label for="inp-product">Produto</label>
-        <select id="inp-product" onchange="Form.onProductChange()">
-          <option value="">Selecione o produto...</option>
-          <optgroup label="── Anotação ──" id="grp-anotacao"></optgroup>
-          <optgroup label="── Mercadoria ──" id="grp-mercadoria"></optgroup>
-          <option value="outro">Outro (digitar)...</option>
-        </select>
+      <div class="login-footer-left">
+        <span>© 2026 — Painel de Gestão Comercial</span>
       </div>
-      <div class="field">
-        <label for="inp-qty">Qtd.</label>
-        <input type="number" id="inp-qty" value="1" min="1" max="99" step="1"/>
-      </div>
-      <div class="field">
-        <label for="inp-value">Valor unit. (R$)</label>
-        <input type="number" id="inp-value" placeholder="0,00" min="0" step="0.01"/>
-      </div>
-      <div class="field field-btn">
-        <label class="label-hidden">Ação</label>
-        <button class="btn btn-primary" onclick="Form.addSale()">＋ Registrar</button>
-      </div>
-    </div>
-    <!-- Preview comissão em tempo real -->
-    <div class="commission-preview" id="commission-preview"></div>
-    <div id="custom-row" class="custom-row hidden">
-      <div class="field">
-        <label for="inp-custom">Nome do produto</label>
-        <input type="text" id="inp-custom" placeholder="Digite o nome do produto..."/>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ═══ HISTÓRICO ═══ -->
-  <section>
-    <div class="list-header">
-      <h2 class="section-title">Histórico de vendas</h2>
-      <div class="list-header-right">
-        <span class="list-count" id="list-count"></span>
-        <select class="sort-select" id="sort-select" onchange="App.setSort(this.value)">
-          <option value="date-desc">Mais recentes</option>
-          <option value="date-asc">Mais antigas</option>
-          <option value="value-desc">Maior valor</option>
-          <option value="value-asc">Menor valor</option>
-          <option value="product-asc">Produto A→Z</option>
-        </select>
-      </div>
-    </div>
-    <div class="sales-list" id="sales-list">
-      <div class="empty-state">Nenhuma venda registrada ainda.<br/>Use o formulário acima ou o microfone para começar.</div>
-    </div>
-    <!-- Paginação -->
-    <div class="pagination" id="pagination"></div>
-  </section>
+    <!-- ═══ LADO DIREITO — formulário ═══ -->
+    <section class="login-right">
+      <h2>Entrar</h2>
+      <p class="subtitle">Acesse sua conta para continuar</p>
 
-  <!-- ═══ AÇÕES ═══ -->
-  <div class="actions-row">
-    <button class="btn btn-action" onclick="Report.generateText()">📄 Relatório</button>
-    <button class="btn btn-action" onclick="Report.exportPDF()">⬇️ PDF</button>
-    <button class="btn btn-action" onclick="Report.exportExcel()">📊 Excel</button>
-    <button class="btn btn-action" onclick="Importer.openModal()">📥 Importar</button>
-    <button class="btn btn-action" onclick="Backup.import()">📂 Restaurar</button>
-    <button class="btn btn-danger" onclick="App.resetSales()">🗑</button>
-  </div>
+      <form id="login-form" autocomplete="off">
 
-  <!-- ═══ GRÁFICO TOP 5 (ao final) ═══ -->
-  <section class="card chart-section">
-    <h2 class="card-title">🥧 Top 5 — Produtos mais vendidos</h2>
-    <div class="chart-container">
-      <div class="chart-canvas-wrap">
-        <canvas id="top5Chart"></canvas>
-      </div>
-      <div id="top5Legend" class="chart-legend">
-        <p class="chart-empty">Nenhuma venda registrada ainda.</p>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<!-- ═══ MODAL RELATÓRIO ═══ -->
-<div class="modal-overlay hidden" id="modal-report" onclick="Report.closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>📊 Relatório de Vendas</h2>
-      <button class="btn-close" onclick="Report.closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <pre id="modal-content" class="report-text"></pre>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-action" onclick="Report.copyToClipboard()">📋 Copiar</button>
-      <button class="btn btn-primary" onclick="Report.closeModal()">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ MODAL EDIÇÃO ═══ -->
-<div class="modal-overlay hidden" id="modal-edit" onclick="Editor.closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>✏️ Editar Venda</h2>
-      <button class="btn-close btn-close-white" onclick="Editor.closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="edit-form">
         <div class="field">
-          <label for="edit-product">Módulo / Produto</label>
-          <select id="edit-product" onchange="Editor.onProductChange()">
-            <option value="">Selecione...</option>
-            <optgroup label="── Anotação ──" id="edit-grp-anotacao"></optgroup>
-            <optgroup label="── Mercadoria ──" id="edit-grp-mercadoria"></optgroup>
-            <option value="outro">Outro (digitar)...</option>
-          </select>
+          <label for="username">Usuário</label>
+          <input type="text" id="username" name="username" placeholder="Digite seu usuário" autocomplete="username" />
         </div>
-        <div id="edit-custom-row" class="custom-row hidden">
-          <div class="field">
-            <label for="edit-custom">Nome do produto</label>
-            <input type="text" id="edit-custom" placeholder="Nome do produto..."/>
+
+        <div class="field">
+          <label for="password">Senha</label>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" placeholder="Digite sua senha" autocomplete="current-password" />
+            <button type="button" class="btn-toggle-pass" id="btn-toggle-pass" aria-label="Mostrar senha">👁️</button>
           </div>
+          <p class="caps-warning hidden" id="caps-warning">⇪ Caps Lock está ativado</p>
         </div>
-        <div class="field">
-          <label for="edit-date">Data da venda</label>
-          <input type="date" id="edit-date"/>
+
+        <!-- Mensagem de erro (oculta por padrão) -->
+        <p class="error-msg hidden" id="error-msg">Usuário ou senha incorretos.</p>
+
+        <div class="field-row">
+          <label class="remember-wrap">
+            <input type="checkbox" id="remember-me" />
+            <span>Manter conectado</span>
+          </label>
         </div>
-        <div class="field">
-          <label for="edit-value">Valor (R$)</label>
-          <input type="number" id="edit-value" placeholder="0,00" min="0" step="0.01" oninput="Editor.updatePreview()"/>
-        </div>
-        <div class="edit-commission-preview" id="edit-comm-preview"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-save-green" onclick="Editor.save()">💾 Salvar alterações</button>
-      <button class="btn" onclick="Editor.closeModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
 
-<!-- ═══ MODAL IMPORTAÇÃO ═══ -->
-<div class="modal-overlay hidden" id="modal-import" onclick="Importer.closeModal(event)">
-  <div class="modal modal-wide">
-    <div class="modal-header">
-      <h2>📥 Importar Relatório</h2>
-      <button class="btn-close" onclick="Importer.closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <p class="import-instructions">Cole um relatório gerado pelo sistema. As vendas serão identificadas automaticamente.</p>
-      <textarea id="import-textarea" class="import-textarea" rows="10" spellcheck="false"
-        placeholder="Cole aqui o relatório...&#10;&#10;Exemplo:&#10;ESTOQUE — 2 vendas&#10;  1. 03/06/2026  |  Valor: R$40,00  |  Comissão: R$40,00 (100%)"></textarea>
-      <div class="import-preview hidden" id="import-preview">
-        <div class="import-preview-title">✅ Vendas identificadas:</div>
-        <div id="import-preview-list" class="import-preview-list"></div>
-      </div>
-      <div class="import-error hidden" id="import-error"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-action" onclick="Importer.preview()">🔍 Pré-visualizar</button>
-      <button class="btn btn-primary hidden" id="btn-confirm-import" onclick="Importer.confirm()">✅ Confirmar</button>
-      <button class="btn" onclick="Importer.closeModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
+        <button type="submit" class="btn-login">
+          <span class="btn-text">Entrar</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
 
-<!-- ═══ MODAL EDITAR META ═══ -->
-<div class="modal-overlay hidden" id="modal-meta" onclick="MetaEditor.closeModal(event)">
-  <div class="modal modal-sm">
-    <div class="modal-header">
-      <h2 id="meta-modal-title">✎ Editar Meta</h2>
-      <button class="btn-close" onclick="MetaEditor.closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label for="meta-value-input" id="meta-modal-label">Valor da meta (R$)</label>
-        <input type="number" id="meta-value-input" min="100" step="100" placeholder="2000"/>
-      </div>
-      <p class="meta-hint">A meta é mensal e será exibida na barra de progresso.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-save-green" onclick="MetaEditor.save()">💾 Salvar</button>
-      <button class="btn" onclick="MetaEditor.closeModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
+      </form>
 
-<!-- ═══ TOAST ═══ -->
-<div class="toast hidden" id="toast" role="alert" aria-live="polite">
-  <span class="toast-icon" id="toast-icon">✓</span>
-  <span id="toast-msg"></span>
-</div>
+      <p class="login-hint">Acesso restrito — uso pessoal</p>
+      <p class="attempts-hint hidden" id="attempts-hint"></p>
+    </section>
 
-<!-- input oculto para restaurar backup -->
-<input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="Backup.importFile(this)"/>
+  </main>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
