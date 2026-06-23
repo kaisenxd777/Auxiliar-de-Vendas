@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ============================================================
  * ASSISTENTE DE VENDAS & COMISSÕES — script.js v5
  * ============================================================
@@ -413,7 +413,7 @@ const UI = (() => {
             </div>
           </div>
           <div class="sale-info">
-            <div class="sale-product">${productHtml}${s.qty > 1 ? `<span class="sale-qty-badge">×${s.qty}</span>` : ''}</div>
+            <div class="sale-product">${productHtml}${(s.qty && s.qty > 1) ? `<span class="sale-qty-badge">×${s.qty}</span>` : ''}</div>
             <div class="sale-date">${s.date}</div>
           </div>
           <span class="badge b-${s.type}">${badgeLabel(s.type)}</span>
@@ -821,7 +821,7 @@ const Voice = (() => {
       return;
     }
     const cfg = Config.ALL[bestMatch];
-    const fv  = value ?? (cfg.default != null ? cfg.default : null);
+    const fv  = (value != null && !isNaN(value)) ? value : (cfg.default != null ? cfg.default : null);
     if (!fv) { Form.prefill(bestMatch); Toast.show(`"${bestMatch}" reconhecido. Informe o valor.`, 'warn'); return; }
     const ok = Form.addSale(bestMatch, fv);
     if (ok) document.getElementById('voice-transcript').textContent = `✅ "${bestMatch}" — ${Utils.fmtBRL(fv)}`;
@@ -1354,3 +1354,4 @@ const App = (() => {
    BOOT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', App.init);
+

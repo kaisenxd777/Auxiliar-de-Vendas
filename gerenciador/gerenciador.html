@@ -1,8 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0e0e14"/>
+  <meta name="description" content="Assistente de Vendas & Comissões — gestão completa de vendas, metas e relatórios."/>
   <title>Assistente de Vendas & Comissões</title>
   <link rel="stylesheet" href="style1.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -317,6 +319,17 @@
 <!-- input oculto para restaurar backup -->
 <input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="Backup.importFile(this)"/>
 
+<!-- ═══════════════════════════════════════════════════
+     ASSISTENTE COMERCIAL
+     Componente isolado — não interfere no restante do
+     sistema. Código-fonte em /assistant/.
+     ═══════════════════════════════════════════════════ -->
+<script src="assistant/knowledge-base.js"></script>
+<script src="assistant/assistant-engine.js"></script>
+<script src="assistant/assistant-template.js"></script>
+<script src="assistant/assistant.js"></script>
+
 <script src="script1.js"></script>
 </body>
 </html>
+
