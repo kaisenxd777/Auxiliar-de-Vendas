@@ -122,7 +122,6 @@ body{font-family:var(--font);font-size:14px;background:var(--bg-page);color:var(
 @keyframes pulse-mic{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
 
 /* ── Form ── */
-.form-card{}
 .form-row{display:grid;grid-template-columns:1.8fr 0.5fr 0.8fr 140px;gap:12px;align-items:end}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:12px;color:var(--text-secondary);font-weight:500}
@@ -136,7 +135,7 @@ body{font-family:var(--font);font-size:14px;background:var(--bg-page);color:var(
 /* ── Inputs ── */
 input,select,textarea{font-family:var(--font);font-size:14px;color:var(--text-primary);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 12px;width:100%;transition:border-color var(--tr),box-shadow var(--tr);outline:none;-webkit-appearance:none;appearance:none}
 input[type=date]{padding:7px 12px}
-input[type=number]{-moz-appearance:textfield}
+input[type=number]{-moz-appearance:textfield;-webkit-appearance:textfield;appearance:textfield}
 input[type=number]::-webkit-inner-spin-button{opacity:.5}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239898bb' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 input:focus,select:focus,textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(124,124,248,.18)}
