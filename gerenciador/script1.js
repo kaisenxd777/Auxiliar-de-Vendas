@@ -62,7 +62,9 @@ const Config = (() => {
     {name:'NFSe',                       default:30.00,  rule:'modulo'},
     {name:'NF-e Importação Mensal',     default:null,   rule:'modulo'},
     {name:'SPED',                       default:300.00, rule:'modulo'},
+    {name:'SPED Avulso',                default:350.00, rule:'fixo20'},
     {name:'Sintegra',                   default:140.00, rule:'modulo'},
+    {name:'Sintegra Avulso',            default:150.00, rule:'fixo20'},
     {name:'Usuário adicional',          default:50.00,  rule:'modulo'},
     {name:'Usuário adicional cloud',    default:150.00, rule:'cloud'},
   ];
@@ -121,7 +123,18 @@ const Utils = (() => {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-  return { fmtBRL, todayStr, dateExtended, currentMonthSuffix, weekStart, parseDate, toInputDate, fromInputDate, round2, escapeHtml, escapeRegex };
+  // Gera ID único — usa crypto.randomUUID() quando disponível; cai para
+  // fallback com contador quando o contexto não é seguro (file://, http simples).
+  // Evita colisões do antigo `Date.now()` ao registrar várias vendas no mesmo ms.
+  let _idCounter = 0;
+  function generateId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    _idCounter = (_idCounter + 1) % 100000;
+    return `id_${Date.now()}_${_idCounter}_${Math.floor(Math.random() * 100000)}`;
+  }
+  return { fmtBRL, todayStr, dateExtended, currentMonthSuffix, weekStart, parseDate, toInputDate, fromInputDate, round2, escapeHtml, escapeRegex, generateId };
 })();
 
 /* ============================================================
@@ -142,6 +155,7 @@ const Store = (() => {
     if (p.rule === 'certificado')  return { rate:'Fixo R$10',   amount: 10,                             type:'certificado'  };
     if (p.rule === 'nfe-avulsa')   return { rate:'Fixo R$20',   amount: 20,                             type:'nfe-avulsa'   };
     if (p.rule === 'fixo10')       return { rate:'Fixo R$10',   amount: 10,                             type:'fixo'         };
+    if (p.rule === 'fixo20')       return { rate:'Fixo R$20',   amount: 20,                             type:'fixo'         };
     if (p.rule === 'cloud')        return { rate:'Valor − R$68',amount: Utils.round2(Math.max(0,v-68)), type:'cloud'        };
     return                                { rate:'100%',         amount: Utils.round2(v),               type:'modulo'       };
   }
@@ -153,7 +167,7 @@ const Store = (() => {
     const added = [];
     for (let i = 0; i < qty; i++) {
       const s = {
-        id: Date.now() + i,
+        id: Utils.generateId(),
         product: name,
         value:   Utils.round2(value),
         commission: c.amount,
@@ -172,7 +186,7 @@ const Store = (() => {
 
   function importSale(data) {
     sales.push({
-      id: Date.now() + Math.random(),
+      id: Utils.generateId(),
       product:    data.product,
       value:      Utils.round2(data.value),
       commission: Utils.round2(data.commission),
