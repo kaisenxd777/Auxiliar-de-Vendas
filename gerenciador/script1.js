@@ -41,6 +41,7 @@ const Config = (() => {
   const ANOTACAO = [
     {name:'API Boleto Fácil',           default:50.00,  rule:'modulo'},
     {name:'API SMS',                    default:28.57,  rule:'modulo'},
+    {name:'Android',                    default:50.00,  rule:'modulo'},
     {name:'Averbador de Seguro',        default:28.57,  rule:'modulo'},
     {name:'Backup Nuvem',               default:37.00,  rule:'modulo'},
     {name:'Comercial',                  default:50.00,  rule:'modulo'},
@@ -54,6 +55,7 @@ const Config = (() => {
     {name:'Licença adicional',          default:50.00,  rule:'modulo'},
     {name:'Loja Virtual',               default:100.00, rule:'modulo'},
     {name:'Marketplace',                default:71.42,  rule:'modulo'},
+    {name:'Migração de plano',          default:100.00, rule:'modulo'},
     {name:'NFCe',                       default:50.00,  rule:'modulo'},
     {name:'NFe',                        default:30.00,  rule:'modulo'},
     {name:'NFe Importação',             default:150.00, rule:'modulo'},
@@ -1354,4 +1356,3 @@ const App = (() => {
    BOOT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', App.init);
-
