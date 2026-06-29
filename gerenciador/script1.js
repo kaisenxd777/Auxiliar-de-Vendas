@@ -181,11 +181,12 @@ const Store = (() => {
     }
     persist();
     checkAchievements();
+    added.forEach(s => CloudSync.syncAdd(s));
     return added;
   }
 
   function importSale(data) {
-    sales.push({
+    const s = {
       id: Utils.generateId(),
       product:    data.product,
       value:      Utils.round2(data.value),
@@ -193,8 +194,10 @@ const Store = (() => {
       rate:       data.rate,
       type:       data.type,
       date:       data.date || Utils.todayStr(),
-    });
+    };
+    sales.push(s);
     persist();
+    CloudSync.syncAdd(s);
   }
 
   function updateSale(id, newProduct, newValue, newDate) {
@@ -203,15 +206,21 @@ const Store = (() => {
     const c = calcCommission(newProduct, newValue);
     sales[idx] = { ...sales[idx], product: newProduct, value: Utils.round2(newValue), commission: c.amount, rate: c.rate, type: c.type, date: newDate || sales[idx].date };
     persist();
+    CloudSync.syncUpdate(sales[idx]);
     return true;
   }
 
   function deleteSale(id) {
     sales = sales.filter(s => String(s.id) !== String(id));
     persist();
+    CloudSync.syncDelete(id);
   }
 
-  function reset() { sales = []; persist(); }
+  function reset() {
+    sales = [];
+    persist();
+    CloudSync.syncResetAll();
+  }
 
   /* ── Queries ── */
   function getFiltered(period) {
@@ -1369,4 +1378,4 @@ const App = (() => {
 /* ============================================================
    BOOT
    ============================================================ */
-document.addEventListener('DOMContentLoaded', App.init);
+document.addEventListener('DOMContentLoaded', () => { CloudSync.init(); App.init(); });
